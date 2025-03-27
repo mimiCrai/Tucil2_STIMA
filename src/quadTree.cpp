@@ -20,6 +20,14 @@ public:
 
     // HARUS inisialisasi parent dengan NULL saat pemanggilan pertama =====================!!!!!!!!!!!!!!=========================
     quadTree(int h, int w, int var, int minBlockHeightSize, int minBlockWidthSize, double threshold, int startH, int startW, quadTree* parent);
+    /* panjang jd kujelasin dikit
+    1. h dan w adalah ukuran block saat ini
+    2. var adalah pilian variansi (input)
+    3. minBlockHeightSize dan minBlockWidthSize adalah pilihan ukuran minimum (input)
+    4. threshold adalah batas (input)
+    5. startH dan startW adalah koordinat di gambar aslinya, harusnya ini cm dipake untuk memudahkan aj. Kalau diaras ga dibutuhin, hapus aja
+    6. parent untuk bentuk tree
+    */
     ~quadTree();
 
     void setValue(int h, int w, rgb value);
@@ -42,6 +50,10 @@ public:
     rgb returnBlockColor();
     rgb getCompressedColor(int h, int w);
 
+    int getDepth();
+    int getNodeAmount();
+
+    // Belum bikin function untuk ngeset value array block biar otomatis. Untuk sementara harus manual pake set value.
 };
 
 
@@ -74,6 +86,7 @@ rgb quadTree::getValue(int h, int w)
     return block[h * width + w];
 }
 
+//ambil value mean dari red, green, blue.
 rgb quadTree::getMean()
 {
     rgb mean;
@@ -93,6 +106,7 @@ rgb quadTree::getMean()
     return mean;
 }
 
+//ambil value red min, green min, blue min.
 rgb quadTree::getMin()
 {
     rgb min;
@@ -112,6 +126,7 @@ rgb quadTree::getMin()
     return min;
 }
 
+//ambil value red max, green max, blue max.
 rgb quadTree::getMax()
 {
     rgb max;
@@ -131,6 +146,7 @@ rgb quadTree::getMax()
     return max;
 }
 
+//masuk rumus 1
 double quadTree::variance_variance()
 {
     double variance = 0;
@@ -148,6 +164,7 @@ double quadTree::variance_variance()
     return variance;
 }
 
+//masuk rumus 2
 double quadTree::variance_MeanAbsoluteDeviation()
 {
     double mean_absolute_deviation = 0;
@@ -164,6 +181,7 @@ double quadTree::variance_MeanAbsoluteDeviation()
     return mean_absolute_deviation;
 }
 
+//masuk rumus 3
 double quadTree::variance_MaxPixelDifference()
 {
     double max_pixel_difference = 0;
@@ -176,6 +194,7 @@ double quadTree::variance_MaxPixelDifference()
     return max_pixel_difference;
 }
 
+//masuk rumus 4
 double quadTree::variance_Entropy()
 {
     double entropy = 0;
@@ -197,6 +216,7 @@ double quadTree::variance_Entropy()
     }
     entropy /= 3;
 }
+
 
 //algoritma divide&conquer disini
 void quadTree::checkDivideBlock()
@@ -289,7 +309,8 @@ void quadTree::checkDivideBlock()
     }
 }
 
-// Fungsi ini tidak ada panduan, jadi diasumsikan sementara kyk di bawah ini
+
+// Fungsi ini tidak ada panduan, jadi diasumsikan sementara kyk di bawah ini. dia menormalisasikan warna di satu blok
 void quadTree::colorNormalization()
 {
     int total_pixel = height * width;
@@ -315,6 +336,8 @@ rgb quadTree::returnBlockColor()
     return normalized_color;
 }
 
+
+//gatau kepake ga, tapi basically ngambil warna setelah dicompress, di koordinat <h,w>
 rgb quadTree::getCompressedColor(int h, int w)
 {
     if(isSmallest)
@@ -340,4 +363,48 @@ rgb quadTree::getCompressedColor(int h, int w)
             return child4->getCompressedColor(h - height / 2, w - width / 2);
         }
     }
-}// xixixixixi 7*7*7
+}
+
+
+//max depth dfs
+int quadTree::getDepth()
+{
+    if(isSmallest)
+    {
+        return 0;
+    }
+    else
+    {
+        int depth1 = child1->getDepth();
+        int depth2 = child2->getDepth();
+        int depth3 = child3->getDepth();
+        int depth4 = child4->getDepth();
+        int max_depth = depth1;
+        if(depth2 > max_depth)
+        {
+            max_depth = depth2;
+        }
+        if(depth3 > max_depth)
+        {
+            max_depth = depth3;
+        }
+        if(depth4 > max_depth)
+        {
+            max_depth = depth4;
+        }
+        return max_depth + 1;
+    }
+}
+
+//total dfs
+int quadTree::getNodeAmount()
+{
+    if(isSmallest)
+    {
+        return 1;
+    }
+    else
+    {
+        return child1->getNodeAmount() + child2->getNodeAmount() + child3->getNodeAmount() + child4->getNodeAmount() + 1;
+    }
+}
