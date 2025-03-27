@@ -1,6 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
-#include "quadTree.cpp"
+#include "quadTree.hpp"
 #include <vector>
 #include <string>
 

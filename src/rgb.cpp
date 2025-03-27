@@ -1,15 +1,4 @@
-class rgb
-{
-private:
-public:
-    int red;
-    int green;
-    int blue;
-    rgb();
-    rgb(int r, int g, int b);
-    ~rgb();
-    
-};
+#include "rgb.hpp"
 
 rgb::rgb(): red(0), green(0), blue(0) {}
 
