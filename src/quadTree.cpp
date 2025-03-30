@@ -1,37 +1,37 @@
-#include "quadTree.hpp"
+#include "QuadTree.hpp"
 
-quadTree::quadTree(int h, int w, int var, int minBlockHeightSize, int minBlockWidthSize, double threshold, int startH, int startW, quadTree* Par) : height(h), width(w), variance_choice(var), minimum_block__height_size(minBlockHeightSize), minimum_block_width_size(minBlockWidthSize), threshold(threshold), startHeight(startH), startWidth(startW), parent(Par)
+QuadTree::QuadTree(int h, int w, int var, int minBlockHeightSize, int minBlockWidthSize, double threshold, int startH, int startW, QuadTree* Par) : height(h), width(w), varianceChoice(var), minimumBlockHeightSize(minBlockHeightSize), minimumBlockWidthSize(minBlockWidthSize), threshold(threshold), startHeight(startH), startWidth(startW), parent(Par)
 {
-    block = new rgb[height * width];
+    block = new RGB[height * width];
     isSmallest = true;
-    child1 = NULL;
-    child2 = NULL;
-    child3 = NULL;
-    child4 = NULL;
+    topLeftChild = NULL;
+    topRightChild = NULL;
+    bottomLeftChild = NULL;
+    bottomRightChild = NULL;
 }
 
 
-quadTree::~quadTree()
+QuadTree::~QuadTree()
 {
     delete[] block;
 }
 
-void quadTree::setValue(int h, int w, rgb value)
+void QuadTree::setValue(int h, int w, RGB value)
 {
     block[h * width + w].red = value.red;
     block[h * width + w].green = value.green;
     block[h * width + w].blue = value.blue;
 }
 
-rgb quadTree::getValue(int h, int w)
+RGB QuadTree::getValue(int h, int w)
 {
     return block[h * width + w];
 }
 
 //ambil value mean dari red, green, blue.
-rgb quadTree::getMean()
+RGB QuadTree::getMean()
 {
-    rgb mean;
+    RGB mean;
     mean.red = 0;
     mean.green = 0;
     mean.blue = 0;
@@ -49,9 +49,9 @@ rgb quadTree::getMean()
 }
 
 //ambil value red min, green min, blue min.
-rgb quadTree::getMin()
+RGB QuadTree::getMin()
 {
-    rgb min;
+    RGB min;
     min.red = 255;
     min.green = 255;
     min.blue = 255;
@@ -69,9 +69,9 @@ rgb quadTree::getMin()
 }
 
 //ambil value red max, green max, blue max.
-rgb quadTree::getMax()
+RGB QuadTree::getMax()
 {
-    rgb max;
+    RGB max;
     max.red = 0;
     max.green = 0;
     max.blue = 0;
@@ -89,10 +89,10 @@ rgb quadTree::getMax()
 }
 
 //masuk rumus 1
-double quadTree::variance_variance()
+double QuadTree::variance()
 {
     double variance = 0;
-    rgb mean = getMean();
+    RGB mean = getMean();
     int total_pixel = height * width;
     for (int i = 0; i < total_pixel; i++)
     {
@@ -107,10 +107,10 @@ double quadTree::variance_variance()
 }
 
 //masuk rumus 2
-double quadTree::variance_MeanAbsoluteDeviation()
+double QuadTree::meanAbsoluteDeviation()
 {
     double mean_absolute_deviation = 0;
-    rgb mean = getMean();
+    RGB mean = getMean();
     int total_pixel = height * width;
     for (int i = 0; i < total_pixel; i++)
     {
@@ -124,11 +124,11 @@ double quadTree::variance_MeanAbsoluteDeviation()
 }
 
 //masuk rumus 3
-double quadTree::variance_MaxPixelDifference()
+double QuadTree::maxPixelDifference()
 {
     double max_pixel_difference = 0;
-    rgb min = getMin();
-    rgb max = getMax();
+    RGB min = getMin();
+    RGB max = getMax();
     max_pixel_difference += abs(max.red - min.red); //abs disini ga wajib si
     max_pixel_difference += abs(max.green - min.green);
     max_pixel_difference += abs(max.blue - min.blue);
@@ -137,7 +137,7 @@ double quadTree::variance_MaxPixelDifference()
 }
 
 //masuk rumus 4
-double quadTree::variance_Entropy()
+double QuadTree::entropy()
 {
     double entropy = 0;
     int total_pixel = height * width;
@@ -161,31 +161,31 @@ double quadTree::variance_Entropy()
 
 
 //algoritma divide&conquer disini
-void quadTree::checkDivideBlock()
+void QuadTree::checkDivideBlock()
 {
-    if(height/2 >= minimum_block__height_size && width/2 >= minimum_block_width_size)
+    if(height/2 >= minimumBlockHeightSize && width/2 >= minimumBlockWidthSize)
     {
         double Variance = 0.0;
-        if(variance_choice == 1)
+        if(varianceChoice == 1)
         {
-            Variance = variance_variance();
+            Variance = variance();
         }
-        else if(variance_choice == 2)
+        else if(varianceChoice == 2)
         {
-            Variance = variance_MeanAbsoluteDeviation();
+            Variance = meanAbsoluteDeviation();
         }
-        else if(variance_choice == 3)
+        else if(varianceChoice == 3)
         {
-            Variance = variance_MaxPixelDifference();
+            Variance = maxPixelDifference();
         }
-        else if(variance_choice == 4)
+        else if(varianceChoice == 4)
         {
-            Variance = variance_Entropy();
+            Variance = entropy();
         }
         // =========================BONUS==========================
-        // else if(variance_choice == 5)
+        // else if(varianceChoice == 5)
         // {
-        //     Variance = variance_StructuralSimilarityIndex();
+        //     Variance = structuralSimilarityIndex();
         // }
         // ========================================================
         else // Error handling kalo user memasukkan input tidak valid
@@ -201,17 +201,17 @@ void quadTree::checkDivideBlock()
             int remainingHeight = height - halfHeight;
             int remainingWidth = width - halfWidth;
 
-            quadTree block1(halfHeight, halfWidth, variance_choice, minimum_block__height_size, minimum_block_width_size, threshold, startHeight, startWidth, this);
-            child1 = &block1;
+            QuadTree block1(halfHeight, halfWidth, varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize, threshold, startHeight, startWidth, this);
+            topLeftChild = &block1;
 
-            quadTree block2(halfHeight, remainingWidth, variance_choice, minimum_block__height_size, minimum_block_width_size, threshold, startHeight, startWidth + halfWidth, this);
-            child2 = &block2;
+            QuadTree block2(halfHeight, remainingWidth, varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize, threshold, startHeight, startWidth + halfWidth, this);
+            topRightChild = &block2;
 
-            quadTree block3(remainingHeight, halfWidth, variance_choice, minimum_block__height_size, minimum_block_width_size, threshold, startHeight + halfHeight, startWidth, this);
-            child3 = &block3;
+            QuadTree block3(remainingHeight, halfWidth, varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize, threshold, startHeight + halfHeight, startWidth, this);
+            bottomLeftChild = &block3;
 
-            quadTree block4(remainingHeight, remainingWidth, variance_choice, minimum_block__height_size, minimum_block_width_size, threshold, startHeight + halfHeight, startWidth + halfWidth, this);
-            child4 = &block4;
+            QuadTree block4(remainingHeight, remainingWidth, varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize, threshold, startHeight + halfHeight, startWidth + halfWidth, this);
+            bottomRightChild = &block4;
 
             for (int i = 0; i < halfHeight; i++)
             {
@@ -253,12 +253,12 @@ void quadTree::checkDivideBlock()
 
 
 // Fungsi ini tidak ada panduan, jadi diasumsikan sementara kyk di bawah ini. dia menormalisasikan warna di satu blok
-void quadTree::colorNormalization()
+void QuadTree::colorNormalization()
 {
     int total_pixel = height * width;
-    rgb min = getMin();
-    rgb max = getMax();
-    rgb normalized;
+    RGB min = getMin();
+    RGB max = getMax();
+    RGB normalized;
     // ===================Jika dirasa terlalu lama, bisa dihapus=======================
     for(int i = 0; i < total_pixel; i++)
     {
@@ -269,18 +269,18 @@ void quadTree::colorNormalization()
     }
     // ================================================================================
     normalized = getMean();
-    normalized_color = normalized;
+    normalizedColor = normalized;
 }
 
 
-rgb quadTree::returnBlockColor()
+RGB QuadTree::returnBlockColor()
 {
-    return normalized_color;
+    return normalizedColor;
 }
 
 
 //gatau kepake ga, tapi basically ngambil warna setelah dicompress, di koordinat <h,w>
-rgb quadTree::getCompressedColor(int h, int w)
+RGB QuadTree::getCompressedColor(int h, int w)
 {
     if(isSmallest)
     {
@@ -290,26 +290,26 @@ rgb quadTree::getCompressedColor(int h, int w)
     {
         if(h < height / 2 && w < width / 2)
         {
-            return child1->getCompressedColor(h, w);
+            return topLeftChild->getCompressedColor(h, w);
         }
         else if(h < height / 2 && w >= width / 2)
         {
-            return child2->getCompressedColor(h, w - width / 2);
+            return topRightChild->getCompressedColor(h, w - width / 2);
         }
         else if(h >= height / 2 && w < width / 2)
         {
-            return child3->getCompressedColor(h - height / 2, w);
+            return bottomLeftChild->getCompressedColor(h - height / 2, w);
         }
         else
         {
-            return child4->getCompressedColor(h - height / 2, w - width / 2);
+            return bottomRightChild->getCompressedColor(h - height / 2, w - width / 2);
         }
     }
 }
 
 
 //max depth dfs
-int quadTree::getDepth()
+int QuadTree::getDepth()
 {
     if(isSmallest)
     {
@@ -317,10 +317,10 @@ int quadTree::getDepth()
     }
     else
     {
-        int depth1 = child1->getDepth();
-        int depth2 = child2->getDepth();
-        int depth3 = child3->getDepth();
-        int depth4 = child4->getDepth();
+        int depth1 = topLeftChild->getDepth();
+        int depth2 = topRightChild->getDepth();
+        int depth3 = bottomLeftChild->getDepth();
+        int depth4 = bottomRightChild->getDepth();
         int max_depth = depth1;
         if(depth2 > max_depth)
         {
@@ -339,7 +339,7 @@ int quadTree::getDepth()
 }
 
 //total dfs
-int quadTree::getNodeAmount()
+int QuadTree::getNodeAmount()
 {
     if(isSmallest)
     {
@@ -347,6 +347,6 @@ int quadTree::getNodeAmount()
     }
     else
     {
-        return child1->getNodeAmount() + child2->getNodeAmount() + child3->getNodeAmount() + child4->getNodeAmount() + 1;
+        return topLeftChild->getNodeAmount() + topRightChild->getNodeAmount() + bottomLeftChild->getNodeAmount() + bottomRightChild->getNodeAmount() + 1;
     }
 }

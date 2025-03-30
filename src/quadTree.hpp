@@ -1,25 +1,25 @@
-#include "rgb.hpp"
+#include "RGB.hpp"
 #include <cmath>
 
-class quadTree
+class QuadTree
 {
 private:
-    quadTree* parent;
+    QuadTree* parent;
     bool isSmallest;
-    quadTree* child1; //top left
-    quadTree* child2; //top right
-    quadTree* child3; //bottom left
-    quadTree* child4; //bottom right
-    rgb normalized_color;
+    QuadTree* topLeftChild; //top left
+    QuadTree* topRightChild; //top right
+    QuadTree* bottomLeftChild; //bottom left
+    QuadTree* bottomRightChild; //bottom right
+    RGB normalizedColor;
     int startHeight, startWidth;
     int height, width;
-    rgb* block;
-    const int variance_choice, minimum_block__height_size, minimum_block_width_size;
+    RGB* block;
+    const int varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize;
     const double threshold; //double bener ga??
 public:
 
     // HARUS inisialisasi parent dengan NULL saat pemanggilan pertama =====================!!!!!!!!!!!!!!=========================
-    quadTree(int h, int w, int var, int minBlockHeightSize, int minBlockWidthSize, double threshold, int startH, int startW, quadTree* parent);
+    QuadTree(int h, int w, int var, int minBlockHeightSize, int minBlockWidthSize, double threshold, int startH, int startW, QuadTree* parent);
     /* panjang jd kujelasin dikit
     1. h dan w adalah ukuran block saat ini
     2. var adalah pilian variansi (input)
@@ -28,27 +28,27 @@ public:
     5. startH dan startW adalah koordinat di gambar aslinya, harusnya ini cm dipake untuk memudahkan aj. Kalau diaras ga dibutuhin, hapus aja
     6. parent untuk bentuk tree
     */
-    ~quadTree();
+    ~QuadTree();
 
-    void setValue(int h, int w, rgb value);
-    rgb getValue(int h, int w);
+    void setValue(int h, int w, RGB value);
+    RGB getValue(int h, int w);
 
-    rgb getMean();
-    rgb getMin();
-    rgb getMax();
+    RGB getMean();
+    RGB getMin();
+    RGB getMax();
 
-    double variance_variance();
-    double variance_MeanAbsoluteDeviation();
-    double variance_MaxPixelDifference();
-    double variance_Entropy();
-    double variance_StructuralSimilarityIndex(); // BONUS
+    double variance();
+    double meanAbsoluteDeviation();
+    double maxPixelDifference();
+    double entropy();
+    double structuralSimilarityIndex(); // BONUS
 
     void checkDivideBlock();
 
     void colorNormalization();
 
-    rgb returnBlockColor();
-    rgb getCompressedColor(int h, int w);
+    RGB returnBlockColor();
+    RGB getCompressedColor(int h, int w);
 
     int getDepth();
     int getNodeAmount();

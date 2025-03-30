@@ -1,7 +1,7 @@
-#include "rgb.hpp"
+#include "RGB.hpp"
 
-rgb::rgb(): red(0), green(0), blue(0) {}
+RGB::RGB(): red(0), green(0), blue(0) {}
 
-rgb::rgb(int r, int g, int b): red(r), green(g), blue(b) {}
+RGB::RGB(int r, int g, int b): red(r), green(g), blue(b) {}
 
-rgb::~rgb() {}
+RGB::~RGB() {}
