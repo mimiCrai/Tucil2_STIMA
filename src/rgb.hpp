@@ -1,14 +1,12 @@
-//digunakan untuk memudahakan 
-
-class rgb
+class RGB
 {
 private:
 public:
     int red;
     int green;
     int blue;
-    rgb();
-    rgb(int r, int g, int b);
-    ~rgb();
+    RGB();
+    RGB(int r, int g, int b);
+    ~RGB();
 };
 
