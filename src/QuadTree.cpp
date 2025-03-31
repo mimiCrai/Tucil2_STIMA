@@ -2,12 +2,11 @@
 #include <algorithm>
 
 int QuadTree::varianceChoice = 1;
-int QuadTree::minimumBlockHeightSize = 4;
-int QuadTree::minimumBlockWidthSize = 4;
+int QuadTree::minimumBlockSize = 10;
 int QuadTree::height = 0;
 int QuadTree::width = 0;
 int QuadTree::numNodes = 1;
-double QuadTree::threshold = 0.5;
+double QuadTree::threshold = 100;
 RGB* QuadTree::block = nullptr;
 
 
@@ -41,6 +40,7 @@ void QuadTree::setValue(int h, int w, RGB value)
     block[h * width + w].red = value.red;
     block[h * width + w].green = value.green;
     block[h * width + w].blue = value.blue;
+    block[h * width + w].alpha = value.alpha;
 }
 
 RGB QuadTree::getValue(int h, int w)
@@ -52,55 +52,44 @@ RGB QuadTree::getValue(int h, int w)
 RGB QuadTree::getMean()
 {
     RGB mean;
-    mean.red = 0;
-    mean.green = 0;
-    mean.blue = 0;
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            mean.red += getValue(i, j).red;
-            mean.green += getValue(i, j).green;
-            mean.blue += getValue(i, j).blue;
+            mean += getValue(i, j);
         }
     }
     int total_pixel = currentHeight * currentWidth;
-    mean.red /= total_pixel;
-    mean.green /= total_pixel;
-    mean.blue /= total_pixel;
+    mean /= total_pixel;
     return mean;
 }
 
 //ambil value red min, green min, blue min.
 RGB QuadTree::getMin()
 {
-    RGB min(255, 255, 255);
+    RGB mini(255, 255, 255, 255);
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            min.red = std::min(min.red, getValue(i, j).red);
-            min.green = std::min(min.green, getValue(i, j).green);
-            min.blue = std::min(min.blue, getValue(i, j).blue);
+            mini = min(mini, getValue(i, j));
         }
     }
-    return min;
+    return mini;
 }
 
 //ambil value red max, green max, blue max.
 RGB QuadTree::getMax()
 {
-    RGB max;
+    RGB maks;
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            max.red = std::max(max.red, getValue(i, j).red);
-            max.green = std::max(max.green, getValue(i, j).green);
-            max.blue = std::max(max.blue, getValue(i, j).blue);
+            maks = max(maks, getValue(i, j));
         }
     }
-    return max;
+    return maks;
 }
 
 //masuk rumus 1
@@ -120,7 +109,7 @@ double QuadTree::variance()
     int total_pixel = currentHeight * currentWidth;
     variance /= total_pixel;
     variance /= 3;
-    variance = sqrt(variance);
+    // variance = sqrt(variance);
     return variance;
 }
 
@@ -178,7 +167,7 @@ double QuadTree::entropy()
 //algoritma divide&conquer disini
 void QuadTree::checkDivideBlock()
 {
-    if(currentHeight/2 >= minimumBlockHeightSize && currentWidth/2 >= minimumBlockWidthSize)
+    if(currentHeight/2 >= minimumBlockSize && currentWidth/2 >= minimumBlockSize)
     {
         double Variance;
         if(varianceChoice == 1) Variance = variance();

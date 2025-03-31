@@ -17,7 +17,7 @@ private:
 public:
     static int height, width, numNodes;
     static RGB* block;
-    static int varianceChoice, minimumBlockHeightSize, minimumBlockWidthSize;
+    static int varianceChoice, minimumBlockSize;
     static double threshold; 
 
     QuadTree();
