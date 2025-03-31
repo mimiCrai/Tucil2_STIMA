@@ -3,6 +3,7 @@
 
 #include "RGB.hpp"
 #include <cmath>
+#include <vector>
 
 class QuadTree
 {

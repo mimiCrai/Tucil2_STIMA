@@ -1,13 +1,13 @@
 #include "QuadTree.hpp"
 #include <algorithm>
 
-int QuadTree::varianceChoice = 1;
+int QuadTree::varianceChoice = 2;
 int QuadTree::minimumBlockHeightSize = 4;
 int QuadTree::minimumBlockWidthSize = 4;
 int QuadTree::height = 0;
 int QuadTree::width = 0;
 int QuadTree::numNodes = 1;
-double QuadTree::threshold = 0.5;
+double QuadTree::threshold = 0.02;
 RGB* QuadTree::block = nullptr;
 
 
@@ -107,20 +107,35 @@ RGB QuadTree::getMax()
 double QuadTree::variance()
 {
     double variance = 0;
+    double max_variance = 0;
+    double temp_variance = 0;
     RGB mean = getMean();
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            variance += pow(getValue(i, j).red - mean.red, 2);
+            // red
+            temp_variance = pow(getValue(i, j).red - mean.red, 2);
             variance += pow(getValue(i, j).green - mean.green, 2);
+            max_variance = std::max(max_variance, temp_variance);
+            
+            // green
+            temp_variance = pow(getValue(i, j).green - mean.green, 2);
+            variance += pow(getValue(i, j).green - mean.green, 2);
+            max_variance = std::max(max_variance, temp_variance);
+
+            // green
+            temp_variance = pow(getValue(i, j).blue - mean.blue, 2);
             variance += pow(getValue(i, j).blue - mean.blue, 2);
+            max_variance = std::max(max_variance, temp_variance);
         }
     }
+
     int total_pixel = currentHeight * currentWidth;
-    variance /= total_pixel;
-    variance /= 3;
-    variance = sqrt(variance);
+    variance /= total_pixel; //var divide
+
+    variance /= 3; //divide RGB
+    variance /= max_variance; //normalisasi ke [0,1]
     return variance;
 }
 
@@ -138,9 +153,12 @@ double QuadTree::meanAbsoluteDeviation()
             mean_absolute_deviation += abs(getValue(i, j).blue - mean.blue);
         }
     }
+
     int total_pixel = currentHeight * currentWidth;
-    mean_absolute_deviation /= total_pixel;
-    mean_absolute_deviation /= 3;
+    mean_absolute_deviation /= total_pixel; //mean divide
+
+    mean_absolute_deviation /= 3; //divide RGB
+    mean_absolute_deviation /= 255; //normalization [0,1]
     return mean_absolute_deviation;
 }
 
@@ -150,27 +168,57 @@ double QuadTree::maxPixelDifference()
     double max_pixel_difference = 0;
     RGB min = getMin();
     RGB max = getMax();
-    max_pixel_difference += abs(max.red - min.red); //abs disini ga wajib si
+    max_pixel_difference += abs(max.red - min.red);
     max_pixel_difference += abs(max.green - min.green);
     max_pixel_difference += abs(max.blue - min.blue);
-    max_pixel_difference /= 3;
+
+    max_pixel_difference /= 3;// divide RGB
+    max_pixel_difference /= 255; //normalisasi ke [0,1]
     return max_pixel_difference;
 }
 
 //masuk rumus 4
 double QuadTree::entropy()
 {
-    double entropy = 0;
+
+    std::vector<int> redFrequency(256, 0);
+    std::vector<int> greenFrequency(256, 0);
+    std::vector<int> blueFrequency(256, 0);
+
+    double entropy = 0.0;
+    int total_pixel = currentHeight * currentWidth;
+    // count frequency
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            entropy -= getValue(i, j).red * log2(getValue(i, j).red);
-            entropy -= getValue(i, j).green * log2(getValue(i, j).green);
-            entropy -= getValue(i, j).blue * log2(getValue(i, j).blue);
+            redFrequency[getValue(i, j).red]++;
+            greenFrequency[getValue(i, j).green]++;
+            blueFrequency[getValue(i, j).blue]++;
         }
     }
-    entropy /= 3;
+    // calc entropy
+    for (int i = 0; i < 256; i++)
+    {
+        if (redFrequency[i] > 0)
+        {
+            double p = static_cast<double>(redFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (greenFrequency[i] > 0)
+        {
+            double p = static_cast<double>(greenFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (blueFrequency[i] > 0)
+        {
+            double p = static_cast<double>(blueFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+    }
+
+    // Normalize entropy to [0, 1]
+    entropy /= log2(256); // max entropy for 8-bit color channel
     return entropy;
 }
 

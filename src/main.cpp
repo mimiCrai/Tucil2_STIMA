@@ -13,7 +13,7 @@ using namespace std;
 int main()
 {
     int width, height, channels;
-    unsigned char* data = stbi_load("test/tes.jpg", &width, &height, &channels, 3);
+    unsigned char* data = stbi_load("test.png", &width, &height, &channels, 3);
     if (data == nullptr) {
         cerr << "Error loading image" << endl;
         return -1;
@@ -48,7 +48,7 @@ int main()
     cout << "Compression complete!" << endl;
     cout << "Number of nodes: " << QuadTree::numNodes << endl;
     cout << "Depth: " << qt.getDepth() << endl;
-    stbi_write_jpg("test/compressed.jpg", width, height, 3, data, 100);
+    stbi_write_jpg("compressed.jpg", width, height, 3, data, 100);
     // stbi_image_free(data);
     // string inputPath, outputPath, gifPath;
     // int errorMethod, threshold, blockSize;
