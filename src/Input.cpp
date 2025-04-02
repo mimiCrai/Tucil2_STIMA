@@ -86,19 +86,17 @@ void blockToImage(){
     for (int i = 0; i < QuadTree::height; i++){
         for (int j = 0; j < QuadTree::width; j++){
             RGB color = QuadTree::block[i * QuadTree::width + j];
+            int index;
             if (fileType == "PNG"){
-                int index = (i * QuadTree::width + j) * 4;
-                imageData[index + 0] = color.red;
-                imageData[index + 1] = color.green;
-                imageData[index + 2] = color.blue;
-                imageData[index + 3] = color.alpha;
+                index = (i * QuadTree::width + j) * 4;
             }
             else{
-                int index = (i * QuadTree::width + j) * 3;
-                imageData[index + 0] = color.red;
-                imageData[index + 1] = color.green;
-                imageData[index + 2] = color.blue;
+                index = (i * QuadTree::width + j) * 3;
             }
+            imageData[index + 0] = color.red;
+            imageData[index + 1] = color.green;
+            imageData[index + 2] = color.blue;
+            // use the default alpha value
         }
     }
 }

@@ -36,7 +36,6 @@ void QuadTree::setValue(int h, int w, RGB value)
     block[h * width + w].red = value.red;
     block[h * width + w].green = value.green;
     block[h * width + w].blue = value.blue;
-    block[h * width + w].alpha = value.alpha;
 }
 
 RGB QuadTree::getValue(int h, int w)
@@ -49,8 +48,8 @@ void QuadTree::setValue(int h, int w, RGB value, RGB* Block)
     Block[h * width + w].red = value.red;
     Block[h * width + w].green = value.green;
     Block[h * width + w].blue = value.blue;
-    Block[h * width + w].alpha = value.alpha;
 }
+
 RGB QuadTree::getValue(int h, int w, RGB* Block)
 {
     return Block[h * width + w];
@@ -290,7 +289,7 @@ void QuadTree::generateGIF(RGB* image, std::string outputPath){
                 gifImageData[index + 0] = getValue(j, k, gifImage).red;
                 gifImageData[index + 1] = getValue(j, k, gifImage).green;
                 gifImageData[index + 2] = getValue(j, k, gifImage).blue;
-                gifImageData[index + 3] = getValue(j, k, gifImage).alpha;
+                gifImageData[index + 3] = getValue(j, k, image).alpha;
             }
         }
         GifWriteFrame(&gif, gifImageData, width, height, 100);
