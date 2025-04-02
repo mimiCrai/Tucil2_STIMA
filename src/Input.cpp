@@ -5,34 +5,31 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
 #include <iostream>
+#include <sstream>
+#include <string>
 #include "Input.hpp"
 #include "include/stb_image.h"
 #include "include/stb_image_write.h"
 
 using namespace std;
 
-unsigned char *imageData;
+unsigned char *imageData = nullptr;
 int imageChannels;
 string fileType;
 
-void inputImage(){
+int inputImage(){
     string inputPath;
     cout << "Masukkan alamat gambar yang akan dikompresi: ";
-    cin >> inputPath;
-    if (inputPath.size() >= 4 && inputPath.substr(inputPath.size() - 4) == ".png"){
+    getline(cin, inputPath);
+    fileType = getFileType(inputPath);
+    if (fileType == "PNG"){
         imageData = stbi_load(inputPath.c_str(), &QuadTree::width, &QuadTree::height, &imageChannels, 4);
-        fileType = "PNG";
     }
-    else if (inputPath.size() >= 4 && inputPath.substr(inputPath.size() - 4) == ".jpg"){
+    else if (fileType == "JPG" ){
         imageData = stbi_load(inputPath.c_str(), &QuadTree::width, &QuadTree::height, &imageChannels, 3);
-        fileType = "JPG";
     }
-    else if (inputPath.size() >= 5 && inputPath.substr(inputPath.size() - 5) == ".jpeg"){
+    else if (fileType == "JPEG"){
         imageData = stbi_load(inputPath.c_str(), &QuadTree::width, &QuadTree::height, &imageChannels, 3);
-        fileType = "JPEG";
-    }
-    else{
-        fileType = "UNKNOWN";
     }
     if (imageData == nullptr){
         cout << "Gambar tidak ditemukan!" << endl;
@@ -40,24 +37,33 @@ void inputImage(){
     }
     else if (fileType == "UNKNOWN"){
         cout << "Format gambar tidak didukung!" << endl;
+        exit(0);
     }
     cout << "Gambar berhasil dimuat!" << endl << endl;
     imageToBlock();
+
+    return getFileSize(inputPath);
 }
 
-void exportImage(){
+int exportImage(){
+    string outputPath;
+    cout << "Masukkan alamat gambar yang akan diekspor: ";
+    getline(cin, outputPath);
+    if (getFileType(outputPath) != fileType){
+        cout << "Format gambar tidak sesuai dengan input!" << endl;
+        exit(0);
+    }
     if (fileType == "PNG"){
-        stbi_write_png("test/output.png", QuadTree::width, QuadTree::height, 4, imageData, QuadTree::width * 4);
-        cout << "Gambar berhasil diekspor ke test/output.png" << endl;
+        stbi_write_png(outputPath.c_str(), QuadTree::width, QuadTree::height, 4, imageData, QuadTree::width * 4);
     }
     else if (fileType == "JPG"){
-        stbi_write_jpg("test/output.jpg", QuadTree::width, QuadTree::height, 3, imageData, 0);
-        cout << "Gambar berhasil diekspor ke test/output.jpg" << endl;
+        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 0);
     }
     else if (fileType == "JPEG"){
-        stbi_write_jpg("test/output.jpeg", QuadTree::width, QuadTree::height, 3, imageData, 0);
-        cout << "Gambar berhasil diekspor ke test/output.jpeg" << endl;
+        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 0);
     }
+    cout << "Gambar berhasil diekspor ke "<< outputPath << endl;
+    return getFileSize(outputPath);
 }
 
 void imageToBlock(){
@@ -114,8 +120,15 @@ void inputErrorMethod(){
     cout << "4. Entropy" << endl;
     // cout << "5. Structural Similarity Index (SSIM)" << endl;
     cout << "Masukkan pilihan (1-4): ";
+    string input;
+    getline(cin, input);
+    stringstream ss(input);
     int choice;
-    cin >> choice;
+    ss >> choice;
+    if (ss.fail() || !ss.eof()){
+        cout << "Pilihan tidak valid!" << endl;
+        exit(0);
+    }
     cout << endl;
     if (choice == 1){
         QuadTree::varianceChoice = 1;
@@ -141,7 +154,14 @@ void inputErrorMethod(){
 
 void inputTreshold(){
     cout << "Masukkan ambang batas error: ";
-    cin >> QuadTree::threshold;
+    string input;
+    getline(cin, input);
+    stringstream ss(input);
+    ss >> QuadTree::threshold;
+    if (ss.fail() || !ss.eof()){
+        cout << "Ambang batas tidak valid!" << endl;
+        exit(0);
+    }
     if (QuadTree::threshold < 0){
         cout << "Ambang batas tidak valid!" << endl;
         exit(0);
@@ -151,12 +171,47 @@ void inputTreshold(){
 
 void inputMinBlockSize(){
     cout << "Masukkan ukuran blok minimum: ";
-    cin >> QuadTree::minimumBlockSize;
+    string input;
+    getline(cin, input);
+    stringstream ss(input);
+    ss >> QuadTree::minimumBlockSize;
+    if (ss.fail() || !ss.eof()){
+        cout << "Ukuran blok minimum tidak valid!" << endl;
+        exit(0);
+    }
     if (QuadTree::minimumBlockSize < 1){
         cout << "Ukuran blok minimum tidak valid!" << endl;
         exit(0);
     }
     cout << endl;
+}
+
+int getFileSize(string filename){
+    FILE *file = fopen(filename.c_str(), "rb");
+    if (file == nullptr){
+        cout << "File tidak ditemukan!" << endl;
+        return -1;
+    }
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+    fclose(file);
+    return size;
+}
+
+string getFileType(string filename){
+    if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".png"){
+        fileType = "PNG";
+    }
+    else if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".jpg"){
+        fileType = "JPG";
+    }
+    else if (filename.size() >= 5 && filename.substr(filename.size() - 5) == ".jpeg"){
+        fileType = "JPEG";
+    }
+    else{
+        fileType = "UNKNOWN";
+    }
+    return fileType;
 }
 
 #endif

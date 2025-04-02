@@ -11,17 +11,17 @@ TARGET = $(BIN_DIR)/main
 
 # Source and object files
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
-OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BIN_DIR)/%.o, $(SRCS))
+OBJS = $(SRCS:$(SRC_DIR)/%.cpp=$(BIN_DIR)/%.o)
 
 # Default target
-all: $(TARGET)
+build: $(TARGET)
 
 # Compile and link
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 # Compile each .cpp into bin/*.o
-$(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BIN_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Ensure bin directory exists
@@ -29,8 +29,10 @@ $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
 
 # Run the compiled binary
-run: all
+run: $(TARGET)
 	./$(TARGET)
+
+all: build run
 
 # Clean up
 clean:

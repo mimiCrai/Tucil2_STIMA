@@ -3,7 +3,7 @@
 
 #include "QuadTree.hpp"
 #include <iostream>
-
+using namespace std;
 
 extern unsigned char *imageData;
 extern int imageChannels;
@@ -13,11 +13,11 @@ extern int imageChannels;
     .jpg = JPG
     .jpeg = JPEG
 */
-extern std::string fileType; 
+extern string fileType; 
 
-void inputImage();
+int inputImage();
 
-void exportImage();
+int exportImage();
 
 void imageToBlock();
 
@@ -29,6 +29,8 @@ void inputTreshold();
 
 void inputMinBlockSize();
 
+int getFileSize(string filename);
 
+string getFileType(string filename);
 
 #endif

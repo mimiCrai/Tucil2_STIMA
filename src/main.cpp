@@ -5,7 +5,7 @@ using namespace std;
 
 int main()
 {
-    inputImage();
+    int originalFileSize = inputImage();
     inputErrorMethod();
     inputTreshold();
     inputMinBlockSize();
@@ -22,11 +22,14 @@ int main()
     blockToImage();
 
     cout << "Compression complete!" << endl << endl;
+    int compressedFileSize = exportImage();
+    cout << endl;
+    cout << "Compression statistics:" << endl;
     cout << "Elapsed time: " << elapsed.count() << " seconds" << endl;
+    cout << "Original image size: " << (double) originalFileSize / 1000 << " kilobytes" << endl;
+    cout << "Compressed image size: " << (double) compressedFileSize / 1000 << " kilobytes" << endl;
+    cout << "Compression percentage: " << (double) (originalFileSize - compressedFileSize) / originalFileSize * 100 << "%" << endl;
+    cout << "Depth of quadtree: " << qt.getDepth() << endl;
     cout << "Number of nodes: " << QuadTree::numNodes << endl;
-    cout << "Depth: " << qt.getDepth() << endl;
-
-    exportImage();
-
     return 0;
 }
