@@ -9,27 +9,37 @@ int main()
     inputErrorMethod();
     inputTreshold();
     inputMinBlockSize();
-    
-    QuadTree qt;
-    cout << "Compresing..." << endl << endl;
+    string exportPath = inputExportPath();
+    string gifPath = inputGifPath();
+
+    RGB* imageBlock = copyQtBlock();
 
     // Divide and conquer algorithm
+    cout << endl << "Compresing..." << endl << endl;
     auto start = chrono::high_resolution_clock::now();
+
+    QuadTree qt;
     qt.checkDivideBlock();
+    
+    int compressedFileSize = exportImage(exportPath);
+    double originalFileSizeInKB = (double) originalFileSize / 1000;
+    double compressedFileSizeInKB = (double) compressedFileSize / 1000;
+    double compressionPercentage = (double) (originalFileSize - compressedFileSize) / originalFileSize * 100;
+    int depth = qt.getDepth();
+    QuadTree::nodesAtDepth = vector<vector<QuadTree*>>(depth + 1);
+    qt.buildNodesAtDepth();
+    qt.generateGIF(imageBlock, gifPath);
+
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = end - start;
 
-    blockToImage();
+    cout << endl << "Compression statistics:" << endl;
 
-    cout << "Compression complete!" << endl << endl;
-    int compressedFileSize = exportImage();
-    cout << endl;
-    cout << "Compression statistics:" << endl;
     cout << "Elapsed time: " << elapsed.count() << " seconds" << endl;
-    cout << "Original image size: " << (double) originalFileSize / 1000 << " kilobytes" << endl;
-    cout << "Compressed image size: " << (double) compressedFileSize / 1000 << " kilobytes" << endl;
-    cout << "Compression percentage: " << (double) (originalFileSize - compressedFileSize) / originalFileSize * 100 << "%" << endl;
-    cout << "Depth of quadtree: " << qt.getDepth() << endl;
+    cout << "Original image size: " << originalFileSizeInKB << " kilobytes" << endl;
+    cout << "Compressed image size: " << compressedFileSizeInKB << " kilobytes" << endl;
+    cout << "Compression percentage: " << compressionPercentage << "%" << endl;
+    cout << "Depth of quadtree: " << depth << endl;
     cout << "Number of nodes: " << QuadTree::numNodes << endl;
     return 0;
 }

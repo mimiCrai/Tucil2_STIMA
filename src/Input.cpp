@@ -4,9 +4,6 @@
 #ifndef STB_IMAGE_WRITE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "Input.hpp"
 #include "include/stb_image.h"
 #include "include/stb_image_write.h"
@@ -39,20 +36,15 @@ int inputImage(){
         cout << "Format gambar tidak didukung!" << endl;
         exit(0);
     }
+
     cout << "Gambar berhasil dimuat!" << endl << endl;
     imageToBlock();
 
     return getFileSize(inputPath);
 }
 
-int exportImage(){
-    string outputPath;
-    cout << "Masukkan alamat gambar yang akan diekspor: ";
-    getline(cin, outputPath);
-    if (getFileType(outputPath) != fileType){
-        cout << "Format gambar tidak sesuai dengan input!" << endl;
-        exit(0);
-    }
+int exportImage(string outputPath){
+    blockToImage();
     if (fileType == "PNG"){
         stbi_write_png(outputPath.c_str(), QuadTree::width, QuadTree::height, 4, imageData, QuadTree::width * 4);
     }
@@ -62,7 +54,7 @@ int exportImage(){
     else if (fileType == "JPEG"){
         stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 0);
     }
-    cout << "Gambar berhasil diekspor ke "<< outputPath << endl;
+    cout << "Compression complete! Gambar berhasil diekspor ke "<< outputPath << endl;
     return getFileSize(outputPath);
 }
 
@@ -129,7 +121,6 @@ void inputErrorMethod(){
         cout << "Pilihan tidak valid!" << endl;
         exit(0);
     }
-    cout << endl;
     if (choice == 1){
         QuadTree::varianceChoice = 1;
     }
@@ -166,7 +157,6 @@ void inputTreshold(){
         cout << "Ambang batas tidak valid!" << endl;
         exit(0);
     }
-    cout << endl;
 }
 
 void inputMinBlockSize(){
@@ -183,7 +173,28 @@ void inputMinBlockSize(){
         cout << "Ukuran blok minimum tidak valid!" << endl;
         exit(0);
     }
-    cout << endl;
+}
+
+string inputExportPath(){
+    string outputPath;
+    cout << "Masukkan alamat gambar yang akan diekspor: ";
+    getline(cin, outputPath);
+    if (getFileType(outputPath) != fileType){
+        cout << "Format gambar tidak sesuai dengan input!" << endl;
+        exit(0);
+    }
+    return outputPath;
+}
+
+string inputGifPath(){
+    string gifPath;
+    cout << "Masukkan alamat GIF yang akan diekspor: ";
+    getline(cin, gifPath);
+    if (getFileType(gifPath) != "GIF"){
+        cout << "Format tidak sesuai!" << endl;
+        exit(0);
+    }
+    return gifPath;
 }
 
 int getFileSize(string filename){
@@ -199,20 +210,32 @@ int getFileSize(string filename){
 }
 
 string getFileType(string filename){
+    string type;
     if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".png"){
-        fileType = "PNG";
+        type = "PNG";
     }
     else if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".jpg"){
-        fileType = "JPG";
+        type = "JPG";
     }
     else if (filename.size() >= 5 && filename.substr(filename.size() - 5) == ".jpeg"){
-        fileType = "JPEG";
+        type = "JPEG";
+    }
+    else if (filename.size() >= 4 && filename.substr(filename.size() - 4) == ".gif"){
+        type = "GIF";
     }
     else{
-        fileType = "UNKNOWN";
+        type = "UNKNOWN";
     }
-    return fileType;
+    return type;
 }
+
+RGB* copyQtBlock(){
+    RGB* output = new RGB[QuadTree::width * QuadTree::height];
+    for (int i = 0; i < QuadTree::width * QuadTree::height; i++)
+        output[i] = QuadTree::block[i];
+    return output;
+}
+
 
 #endif
 #endif
