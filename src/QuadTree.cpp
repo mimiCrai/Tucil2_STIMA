@@ -1,37 +1,32 @@
+#ifndef GIF_H_IMPLEMENTATION
+#define GIF_H_IMPLEMENTATION
+
+#include "include/gif.h"
 #include "QuadTree.hpp"
-#include <algorithm>
 
 int QuadTree::varianceChoice = 1;
-int QuadTree::minimumBlockHeightSize = 4;
-int QuadTree::minimumBlockWidthSize = 4;
+int QuadTree::minimumBlockSize = 10;
 int QuadTree::height = 0;
 int QuadTree::width = 0;
 int QuadTree::numNodes = 1;
-double QuadTree::threshold = 0.5;
+double QuadTree::threshold = 100;
 RGB* QuadTree::block = nullptr;
+std::vector<std::vector<QuadTree*>> QuadTree::nodesAtDepth;
 
 
 QuadTree::QuadTree(int currentH, int currentW, int startH, int startW) : currentHeight(currentH), currentWidth(currentW), startHeight(startH), startWidth(startW)
 {
     isSmallest = true;
     numNodes++;
-    topLeftChild = nullptr;
-    topRightChild = nullptr;
-    bottomLeftChild = nullptr;
-    bottomRightChild = nullptr;
+    topLeftChild = topRightChild = bottomLeftChild = bottomRightChild = nullptr;
 }
 
 QuadTree::QuadTree()
 {
     isSmallest = true;
-    startHeight = 0;
-    startWidth = 0;
-    currentHeight = height;
-    currentWidth = width;
-    topLeftChild = nullptr;
-    topRightChild = nullptr;
-    bottomLeftChild = nullptr;
-    bottomRightChild = nullptr;
+    startHeight = 0, startWidth = 0;
+    currentHeight = height, currentWidth = width;
+    topLeftChild = topRightChild = bottomLeftChild = bottomRightChild = nullptr;
 }
 
 QuadTree::~QuadTree(){}
@@ -48,59 +43,74 @@ RGB QuadTree::getValue(int h, int w)
     return block[h * width + w];
 }
 
-//ambil value mean dari red, green, blue.
+void QuadTree::setValue(int h, int w, RGB value, RGB* Block)
+{
+    Block[h * width + w].red = value.red;
+    Block[h * width + w].green = value.green;
+    Block[h * width + w].blue = value.blue;
+}
+
+RGB QuadTree::getValue(int h, int w, RGB* Block)
+{
+    return Block[h * width + w];
+}
+
 RGB QuadTree::getMean()
 {
     RGB mean;
-    mean.red = 0;
-    mean.green = 0;
-    mean.blue = 0;
     for (int i = startHeight; i < startHeight + currentHeight; i++)
-    {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
-        {
-            mean.red += getValue(i, j).red;
-            mean.green += getValue(i, j).green;
-            mean.blue += getValue(i, j).blue;
-        }
-    }
+            mean += getValue(i, j);
     int total_pixel = currentHeight * currentWidth;
-    mean.red /= total_pixel;
-    mean.green /= total_pixel;
-    mean.blue /= total_pixel;
+    mean /= total_pixel;
+    return mean;
+}
+
+RGB QuadTree::getMean(RGB* Block){
+    RGB mean;
+    for (int i = startHeight; i < startHeight + currentHeight; i++)
+        for (int j = startWidth; j < startWidth + currentWidth; j++)
+            mean += getValue(i, j, Block);
+    int total_pixel = currentHeight * currentWidth;
+    mean /= total_pixel;
     return mean;
 }
 
 //ambil value red min, green min, blue min.
 RGB QuadTree::getMin()
 {
-    RGB min(255, 255, 255);
+    RGB mini(255, 255, 255, 255);
     for (int i = startHeight; i < startHeight + currentHeight; i++)
-    {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
-        {
-            min.red = std::min(min.red, getValue(i, j).red);
-            min.green = std::min(min.green, getValue(i, j).green);
-            min.blue = std::min(min.blue, getValue(i, j).blue);
-        }
-    }
-    return min;
+            mini = min(mini, getValue(i, j));
+    return mini;
 }
 
-//ambil value red max, green max, blue max.
+RGB QuadTree::getMin(RGB *Block)
+{
+    RGB mini(255, 255, 255, 255);
+    for (int i = startHeight; i < startHeight + currentHeight; i++)
+        for (int j = startWidth; j < startWidth + currentWidth; j++)
+            mini = min(mini, getValue(i, j, Block));
+    return mini;
+}
+
 RGB QuadTree::getMax()
 {
-    RGB max;
+    RGB maks;
     for (int i = startHeight; i < startHeight + currentHeight; i++)
-    {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
-        {
-            max.red = std::max(max.red, getValue(i, j).red);
-            max.green = std::max(max.green, getValue(i, j).green);
-            max.blue = std::max(max.blue, getValue(i, j).blue);
-        }
-    }
-    return max;
+            maks = max(maks, getValue(i, j));
+    return maks;
+}
+
+RGB QuadTree::getMax(RGB* Block)
+{
+    RGB maks;
+    for (int i = startHeight; i < startHeight + currentHeight; i++)
+        for (int j = startWidth; j < startWidth + currentWidth; j++)
+            maks = max(maks, getValue(i, j, Block));
+    return maks;
 }
 
 //masuk rumus 1
@@ -120,7 +130,7 @@ double QuadTree::variance()
     int total_pixel = currentHeight * currentWidth;
     variance /= total_pixel;
     variance /= 3;
-    variance = sqrt(variance);
+    // variance = sqrt(variance);
     return variance;
 }
 
@@ -178,7 +188,7 @@ double QuadTree::entropy()
 //algoritma divide&conquer disini
 void QuadTree::checkDivideBlock()
 {
-    if(currentHeight/2 >= minimumBlockHeightSize && currentWidth/2 >= minimumBlockWidthSize)
+    if(currentHeight/2 >= minimumBlockSize && currentWidth/2 >= minimumBlockSize)
     {
         double Variance;
         if(varianceChoice == 1) Variance = variance();
@@ -211,24 +221,26 @@ void QuadTree::checkDivideBlock()
             bottomRightChild->checkDivideBlock();
         }
         else colorNormalization();
-        
     }
     else colorNormalization();
     
 }
 
 
-// Fungsi ini tidak ada panduan, jadi diasumsikan sementara kyk di bawah ini. dia menormalisasikan warna di satu blok
 void QuadTree::colorNormalization()
 {
     RGB normalized = getMean();
     for (int i = startHeight; i < startHeight + currentHeight; i++)
-    {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
-        {
             setValue(i, j, normalized);
-        }
-    }
+}
+
+void QuadTree::colorNormalization(RGB* referenceBlock, RGB* Block)
+{
+    RGB normalized = getMean(referenceBlock);
+    for (int i = startHeight; i < startHeight + currentHeight; i++)
+        for (int j = startWidth; j < startWidth + currentWidth; j++)
+            setValue(i, j, normalized, Block);
 }
 
 //max depth dfs
@@ -248,3 +260,46 @@ int QuadTree::getDepth()
         return max_depth + 1;
     }
 }
+
+
+void QuadTree::buildNodesAtDepth(int depth){
+    nodesAtDepth[depth].push_back(this);
+    if (isSmallest) return;
+    topLeftChild->buildNodesAtDepth(depth + 1);
+    topRightChild->buildNodesAtDepth(depth + 1);
+    bottomLeftChild->buildNodesAtDepth(depth + 1);
+    bottomRightChild->buildNodesAtDepth(depth + 1);
+}
+
+
+void QuadTree::generateGIF(RGB* image, std::string outputPath){
+    RGB* gifImage = new RGB[width * height];
+    unsigned char* gifImageData = new unsigned char[width * height * 4];
+
+    GifWriter gif;
+    GifBegin(&gif, outputPath.c_str(), width, height, 100);
+    
+    for (int i = 0; i < nodesAtDepth.size(); i++){
+        for (QuadTree* qt: nodesAtDepth[i]){
+            qt->colorNormalization(image, gifImage);
+        }
+        for (int j = 0; j < height; j++){
+            for (int k = 0; k < width; k++){
+                int index = (j * width + k) * 4;
+                gifImageData[index + 0] = getValue(j, k, gifImage).red;
+                gifImageData[index + 1] = getValue(j, k, gifImage).green;
+                gifImageData[index + 2] = getValue(j, k, gifImage).blue;
+                gifImageData[index + 3] = getValue(j, k, image).alpha;
+            }
+        }
+        GifWriteFrame(&gif, gifImageData, width, height, 100);
+    }
+
+    GifEnd(&gif);
+
+    std::cout << "✅ GIF berhasil digenerate ke: "<< outputPath << std::endl;
+    delete[] gifImage;
+    delete[] gifImageData;
+}
+
+#endif
