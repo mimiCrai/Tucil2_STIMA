@@ -5,17 +5,22 @@ using namespace std;
 
 int main()
 {
+    cout << endl << "📂  Input" << endl << endl;
     int originalFileSize = inputImage();
+
+    cout << "⚙️  Compression Settings" << endl << endl;
     inputErrorMethod();
     inputTreshold();
     inputMinBlockSize();
+
+    cout << "💾  Export" << endl << endl;
     string exportPath = inputExportPath();
     string gifPath = inputGifPath();
 
     RGB* imageBlock = copyQtBlock();
 
     // Divide and conquer algorithm
-    cout << endl << "Compresing..." << endl << endl;
+    cout << endl << "🛠️  Compresing Image..." << endl << endl;
     auto start = chrono::high_resolution_clock::now();
 
     QuadTree qt;
@@ -30,16 +35,19 @@ int main()
     qt.buildNodesAtDepth();
     qt.generateGIF(imageBlock, gifPath);
 
+    cout << "✅ Compression completed!" << endl;
+
     auto end = chrono::high_resolution_clock::now();
     chrono::duration<double> elapsed = end - start;
 
-    cout << endl << "Compression statistics:" << endl;
+    cout << endl << "📊 Compression Summary" << endl;
+    cout << "-----------------------------------------" << endl;
 
-    cout << "Elapsed time: " << elapsed.count() << " seconds" << endl;
-    cout << "Original image size: " << originalFileSizeInKB << " kilobytes" << endl;
-    cout << "Compressed image size: " << compressedFileSizeInKB << " kilobytes" << endl;
-    cout << "Compression percentage: " << compressionPercentage << "%" << endl;
-    cout << "Depth of quadtree: " << depth << endl;
-    cout << "Number of nodes: " << QuadTree::numNodes << endl;
+    cout << "⏱️   Elapsed time            : "<< elapsed.count() << " seconds" << endl;
+    cout << "📷  Original image size     : " << originalFileSizeInKB << " KB" << endl;
+    cout << "📉  Compressed image size   : " << compressedFileSizeInKB << " KB" << endl;
+    cout << "📦  Compression percentage  : " << compressionPercentage << "%" << endl;
+    cout << "🌳  Depth of quadtree       : " << depth << endl;
+    cout << "🔢  Number of nodes         : " << QuadTree::numNodes << endl;
     return 0;
 }

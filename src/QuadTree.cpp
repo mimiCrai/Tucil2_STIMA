@@ -298,7 +298,7 @@ void QuadTree::generateGIF(RGB* image, std::string outputPath){
 
     GifEnd(&gif);
 
-    std::cout << "GIF Generation complete! GIF berhasil digenerate ke "<< outputPath << std::endl;
+    std::cout << "✅ GIF berhasil digenerate ke: "<< outputPath << std::endl;
     delete[] gifImage;
     delete[] gifImageData;
 }

@@ -22,7 +22,7 @@ int inputImage(){
     if (fileType == "PNG"){
         imageData = stbi_load(inputPath.c_str(), &QuadTree::width, &QuadTree::height, &imageChannels, 4);
     }
-    else if (fileType == "JPG" ){
+    else if (fileType == "JPG"){
         imageData = stbi_load(inputPath.c_str(), &QuadTree::width, &QuadTree::height, &imageChannels, 3);
     }
     else if (fileType == "JPEG"){
@@ -37,7 +37,7 @@ int inputImage(){
         exit(0);
     }
 
-    cout << "Gambar berhasil dimuat!" << endl << endl;
+    cout << "✅ Gambar berhasil dimuat!" << endl << endl;
     imageToBlock();
 
     return getFileSize(inputPath);
@@ -49,12 +49,12 @@ int exportImage(string outputPath){
         stbi_write_png(outputPath.c_str(), QuadTree::width, QuadTree::height, 4, imageData, QuadTree::width * 4);
     }
     else if (fileType == "JPG"){
-        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 0);
+        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 50);
     }
     else if (fileType == "JPEG"){
-        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 0);
+        stbi_write_jpg(outputPath.c_str(), QuadTree::width, QuadTree::height, 3, imageData, 50);
     }
-    cout << "Compression complete! Gambar berhasil diekspor ke "<< outputPath << endl;
+    cout << "✅ Gambar berhasil diekspor ke: "<< outputPath << endl;
     return getFileSize(outputPath);
 }
 
@@ -106,11 +106,11 @@ void blockToImage(){
 
 void inputErrorMethod(){
     cout << "Pilih metode error: " << endl;
-    cout << "1. Variance" << endl;
-    cout << "2. Mean Absolute Deviation (MAD)" << endl;
-    cout << "3. Max Pixel Difference" << endl;
-    cout << "4. Entropy" << endl;
-    // cout << "5. Structural Similarity Index (SSIM)" << endl;
+    cout << "  1. Variance" << endl;
+    cout << "  2. Mean Absolute Deviation (MAD)" << endl;
+    cout << "  3. Max Pixel Difference" << endl;
+    cout << "  4. Entropy" << endl;
+    // cout << "  5. Structural Similarity Index (SSIM)" << endl;
     cout << "Masukkan pilihan (1-4): ";
     string input;
     getline(cin, input);
@@ -140,6 +140,7 @@ void inputErrorMethod(){
         cout << "Pilihan tidak valid!" << endl ;
         exit(0);
     }
+    cout << endl;
 }
 
 
@@ -173,6 +174,7 @@ void inputMinBlockSize(){
         cout << "Ukuran blok minimum tidak valid!" << endl;
         exit(0);
     }
+    cout << endl;
 }
 
 string inputExportPath(){
