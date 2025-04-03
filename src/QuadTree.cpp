@@ -130,7 +130,7 @@ double QuadTree::variance()
     int total_pixel = currentHeight * currentWidth;
     variance /= total_pixel;
     variance /= 3;
-    // variance = sqrt(variance);
+
     return variance;
 }
 
@@ -170,14 +170,39 @@ double QuadTree::maxPixelDifference()
 //masuk rumus 4
 double QuadTree::entropy()
 {
-    double entropy = 0;
+    std::vector<int> redFrequency(256, 0);
+    std::vector<int> greenFrequency(256, 0);
+    std::vector<int> blueFrequency(256, 0);
+
+    double entropy = 0.0;
+    int total_pixel = currentHeight * currentWidth;
+    // count frequency
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            entropy -= getValue(i, j).red * log2(getValue(i, j).red);
-            entropy -= getValue(i, j).green * log2(getValue(i, j).green);
-            entropy -= getValue(i, j).blue * log2(getValue(i, j).blue);
+            redFrequency[getValue(i, j).red]++;
+            greenFrequency[getValue(i, j).green]++;
+            blueFrequency[getValue(i, j).blue]++;
+        }
+    }
+    // calc entropy
+    for (int i = 0; i < 256; i++)
+    {
+        if (redFrequency[i] > 0)
+        {
+            double p = static_cast<double>(redFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (greenFrequency[i] > 0)
+        {
+            double p = static_cast<double>(greenFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (blueFrequency[i] > 0)
+        {
+            double p = static_cast<double>(blueFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
         }
     }
     entropy /= 3;
