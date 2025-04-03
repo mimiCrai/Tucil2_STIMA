@@ -1,32 +1,32 @@
 #include <chrono>
-#include "Input.hpp"
+#include "QuadTree.hpp"
 
 using namespace std;
 
 int main()
 {
     cout << endl << "📂  Input" << endl << endl;
-    int originalFileSize = inputImage();
+    int originalFileSize = inputImage(QuadTree::block, QuadTree::width, QuadTree::height);
 
     cout << "⚙️  Compression Settings" << endl << endl;
-    inputErrorMethod();
-    inputTreshold();
-    inputMinBlockSize();
+    inputErrorMethod(QuadTree::errorChoice);
+    inputTreshold(QuadTree::threshold);
+    inputMinBlockSize(QuadTree::minimumBlockSize);
 
     cout << "💾  Export" << endl << endl;
     string exportPath = inputExportPath();
     string gifPath = inputGifPath();
 
-    RGB* imageBlock = copyQtBlock();
+    RGB* imageBlock = QuadTree::copyBlock();
 
     // Divide and conquer algorithm
     cout << endl << "🛠️  Compresing Image..." << endl << endl;
     auto start = chrono::high_resolution_clock::now();
 
     QuadTree qt;
-    qt.checkDivideBlock();
+    // qt.divConq();
     
-    int compressedFileSize = exportImage(exportPath);
+    int compressedFileSize = exportImage(exportPath, QuadTree::block, QuadTree::width, QuadTree::height);
     double originalFileSizeInKB = (double) originalFileSize / 1000;
     double compressedFileSizeInKB = (double) compressedFileSize / 1000;
     double compressionPercentage = (double) (originalFileSize - compressedFileSize) / originalFileSize * 100;
