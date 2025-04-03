@@ -76,7 +76,6 @@ RGB QuadTree::getMean(RGB* Block){
     return mean;
 }
 
-//ambil value red min, green min, blue min.
 RGB QuadTree::getMin()
 {
     RGB mini(255, 255, 255, 255);
@@ -304,7 +303,7 @@ void QuadTree::checkDivideBlock()
         else if(varianceChoice == 3) Variance = maxPixelDifference();
         else if(varianceChoice == 4) Variance = entropy();
         // =========================BONUS==========================
-        // else if(varianceChoice == 5) Variance = structuralSimilarityIndex();
+        else if(varianceChoice == 5) Variance = structuralSimilarityIndex();
         // ========================================================
         // Error handling kalo user memasukkan input tidak valid
         else Variance = 0;
