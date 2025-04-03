@@ -76,7 +76,6 @@ RGB QuadTree::getMean(RGB* Block){
     return mean;
 }
 
-//ambil value red min, green min, blue min.
 RGB QuadTree::getMin()
 {
     RGB mini(255, 255, 255, 255);
@@ -130,7 +129,7 @@ double QuadTree::variance()
     int total_pixel = currentHeight * currentWidth;
     variance /= total_pixel;
     variance /= 3;
-    // variance = sqrt(variance);
+
     return variance;
 }
 
@@ -170,18 +169,126 @@ double QuadTree::maxPixelDifference()
 //masuk rumus 4
 double QuadTree::entropy()
 {
-    double entropy = 0;
+    std::vector<int> redFrequency(256, 0);
+    std::vector<int> greenFrequency(256, 0);
+    std::vector<int> blueFrequency(256, 0);
+
+    double entropy = 0.0;
+    int total_pixel = currentHeight * currentWidth;
+    // count frequency
     for (int i = startHeight; i < startHeight + currentHeight; i++)
     {
         for (int j = startWidth; j < startWidth + currentWidth; j++)
         {
-            entropy -= getValue(i, j).red * log2(getValue(i, j).red);
-            entropy -= getValue(i, j).green * log2(getValue(i, j).green);
-            entropy -= getValue(i, j).blue * log2(getValue(i, j).blue);
+            redFrequency[getValue(i, j).red]++;
+            greenFrequency[getValue(i, j).green]++;
+            blueFrequency[getValue(i, j).blue]++;
+        }
+    }
+    // calc entropy
+    for (int i = 0; i < 256; i++)
+    {
+        if (redFrequency[i] > 0)
+        {
+            double p = static_cast<double>(redFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (greenFrequency[i] > 0)
+        {
+            double p = static_cast<double>(greenFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
+        }
+        if (blueFrequency[i] > 0)
+        {
+            double p = static_cast<double>(blueFrequency[i]) / total_pixel;
+            entropy -= p * log2(p);
         }
     }
     entropy /= 3;
     return entropy;
+}
+
+//masuk rumus 5
+double QuadTree::structuralSimilarityIndex()
+{
+    double structural_similarity_index = 0;
+    RGB mean = getMean();
+    int total_pixel = currentHeight * currentWidth;
+    double sum_x_2_red = 0, sum_x_y_red = 0;
+    double sum_x_2_green = 0, sum_x_y_green = 0;
+    double sum_x_2_blue = 0, sum_x_y_blue = 0;
+
+    for (int i = startHeight; i < startHeight + currentHeight; i++)
+    {
+        for (int j = startWidth; j < startWidth + currentWidth; j++)
+        {
+            sum_x_2_red += pow(getValue(i, j).red, 2);
+            sum_x_y_red += getValue(i, j).red * mean.red;
+
+            sum_x_2_green += pow(getValue(i, j).green, 2);
+            sum_x_y_green += getValue(i, j).green * mean.green;
+
+            sum_x_2_blue += pow(getValue(i, j).blue, 2);
+            sum_x_y_blue += getValue(i, j).blue * mean.blue;
+        }
+    }
+    
+    double var_x_red = sum_x_2_red / total_pixel - mean.red * mean.red; 
+    double var_x_green = sum_x_2_green / total_pixel - mean.green * mean.green;
+    double var_x_blue = sum_x_2_blue / total_pixel - mean.blue * mean.blue;
+
+    double var_xy_red = sum_x_y_red / total_pixel - mean.red * mean.red;
+    double var_xy_green = sum_x_y_green / total_pixel - mean.green * mean.green;
+    double var_xy_blue = sum_x_y_blue / total_pixel - mean.blue * mean.blue;
+
+
+    /*
+    PENJELASAN PERUBAHAN PADA RUMUS:
+    1. Pada rumusnya, harusnya denominator kedua yang berbentuk (var_x_color + var_y_color + c2) yang dimana y adalah warna pixel pada hasil 
+    prediksi kompresi berubah. Hal ini terjadi karena karena prediksi kompresi menggunakan rata-rata dari warna block, maka variansinya
+    block kompresi bernilai 0, sehingga tidak perlu dimasukkan ke rumus.
+    2. Karena alasan yang sama, maka numerator pertama yang merupakan (2*mean.color*mean.color + c1) akan selalu bernilai sama dengan
+    denominator pertama yang bernilai (mean.color*mean.color + mean.color*mean.color + c1), sehingga kita bisa menghilangkannya.
+    */
+    double c1 = 6.5025, c2 = 58.5225;
+
+    double n_red = (2 * var_xy_red + c2);
+    double d_red = (var_x_red + c2);
+    if(d_red == 0)
+    {
+        structural_similarity_index += 1;
+    }
+    else
+    {
+        structural_similarity_index += n_red / d_red;
+    }
+
+    double n_green = (2 * var_xy_green + c2);
+    double d_green = (var_x_green + c2);
+    structural_similarity_index += n_green / d_green;
+    if(d_green == 0)
+    {
+        structural_similarity_index += 1;
+    }
+    else
+    {
+        structural_similarity_index += n_green / d_green;
+    }
+
+    double n_blue = (2 * var_xy_blue + c2);
+    double d_blue = (var_x_blue + c2);
+    structural_similarity_index += n_blue / d_blue;
+    if(d_blue == 0)
+    {
+        structural_similarity_index += 1;
+    }
+    else
+    {
+        structural_similarity_index += n_blue / d_blue;
+    }
+
+    structural_similarity_index /= 3;
+    return structural_similarity_index;
 }
 
 
@@ -196,7 +303,7 @@ void QuadTree::checkDivideBlock()
         else if(varianceChoice == 3) Variance = maxPixelDifference();
         else if(varianceChoice == 4) Variance = entropy();
         // =========================BONUS==========================
-        // else if(varianceChoice == 5) Variance = structuralSimilarityIndex();
+        else if(varianceChoice == 5) Variance = structuralSimilarityIndex();
         // ========================================================
         // Error handling kalo user memasukkan input tidak valid
         else Variance = 0;
