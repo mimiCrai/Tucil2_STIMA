@@ -18,13 +18,15 @@ extern int imageChannels;
 */
 extern string fileType; 
 
-int inputImage(RGB* block, int &width, int &height);
+int inputImage(RGB* &block, int &width, int &height);
 
-void imageToBlock(RGB* block, int width, int height);
+void imageToBlock(RGB* &block, int width, int height);
 
-void blockToImage(RGB* block, int width, int height);
+void blockToImage(RGB* &block, int width, int height);
 
 void inputErrorMethod(int &errorChoice);
+
+double inputCompressionTarget();
 
 void inputTreshold(double &threshold);
 
@@ -39,5 +41,7 @@ int exportImage(string outputPath, RGB* block, int width, int height);
 int getFileSize(string filename);
 
 string getFileType(string filename);
+
+void freeData();
 
 #endif

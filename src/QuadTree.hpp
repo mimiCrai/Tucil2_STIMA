@@ -63,11 +63,10 @@ public:
 
     void divConq();
     double divConq(double currentThreshold, RGB* referenceBlock);
-    void compressImage(RGB* image, int targetCompression);
+    int compressImage(string exportPath, RGB* image, double targetCompression, int originalFileSize);
 
     void colorNormalization();
     void colorNormalization(RGB* referenceBlock, RGB* Block, unsigned char* ImageData, bool gif = false);
-
 
     int getDepth();
 
@@ -76,6 +75,8 @@ public:
     void generateGIF(RGB* image, std::string outputPath);
 
     static RGB* copyBlock();
+
+    static void copyBlock(RGB* &Block);
 
     // Belum bikin function untuk ngeset value array block biar otomatis. Untuk sementara harus manual pake set value.
 };

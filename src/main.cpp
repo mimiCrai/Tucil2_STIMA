@@ -7,10 +7,13 @@ int main()
 {
     cout << endl << "📂  Input" << endl << endl;
     int originalFileSize = inputImage(QuadTree::block, QuadTree::width, QuadTree::height);
-
+    // cout << QuadTree::width << " x " << QuadTree::height << endl;
     cout << "⚙️  Compression Settings" << endl << endl;
     inputErrorMethod(QuadTree::errorChoice);
-    inputTreshold(QuadTree::threshold);
+    double targetCompression = inputCompressionTarget();
+    if (targetCompression == 0){
+        inputTreshold(QuadTree::threshold);
+    }
     inputMinBlockSize(QuadTree::minimumBlockSize);
 
     cout << "💾  Export" << endl << endl;
@@ -24,9 +27,8 @@ int main()
     auto start = chrono::high_resolution_clock::now();
 
     QuadTree qt;
-    // qt.divConq();
     
-    int compressedFileSize = exportImage(exportPath, QuadTree::block, QuadTree::width, QuadTree::height);
+    int compressedFileSize = qt.compressImage(exportPath, imageBlock, targetCompression, originalFileSize);
     double originalFileSizeInKB = (double) originalFileSize / 1000;
     double compressedFileSizeInKB = (double) compressedFileSize / 1000;
     double compressionPercentage = (double) (originalFileSize - compressedFileSize) / originalFileSize * 100;
@@ -49,5 +51,12 @@ int main()
     cout << "📦  Compression percentage  : " << compressionPercentage << "%" << endl;
     cout << "🌳  Depth of quadtree       : " << depth << endl;
     cout << "🔢  Number of nodes         : " << QuadTree::numNodes << endl;
+    if (targetCompression != 0){
+        cout << "⚠️   Error threshold         : " << QuadTree::threshold << endl;
+    }
+
+    delete[] imageBlock;
+    delete[] QuadTree::block;
+    freeData();
     return 0;
 }

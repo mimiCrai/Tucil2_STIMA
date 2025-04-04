@@ -15,7 +15,7 @@ unsigned char *imageData = nullptr;
 int imageChannels;
 std::string fileType;
 
-int inputImage(RGB* block, int &width, int &height){
+int inputImage(RGB* &block, int &width, int &height){
     string inputPath;
     cout << "Masukkan alamat gambar yang akan dikompresi: ";
     getline(cin, inputPath);
@@ -25,6 +25,7 @@ int inputImage(RGB* block, int &width, int &height){
     }
     else if (fileType == "JPG"){
         imageData = stbi_load(inputPath.c_str(), &width, &height, &imageChannels, 3);
+        stbi_write_jpg("test.jpg", width, height, 3, imageData, 70);
     }
     else if (fileType == "JPEG"){
         imageData = stbi_load(inputPath.c_str(), &width, &height, &imageChannels, 3);
@@ -50,16 +51,15 @@ int exportImage(string outputPath, RGB* block, int width, int height){
         stbi_write_png(outputPath.c_str(), width, height, 4, imageData, width * 4);
     }
     else if (fileType == "JPG"){
-        stbi_write_jpg(outputPath.c_str(), width, height, 3, imageData, 50);
+        stbi_write_jpg(outputPath.c_str(), width, height, 3, imageData, 70);
     }
     else if (fileType == "JPEG"){
-        stbi_write_jpg(outputPath.c_str(), width, height, 3, imageData, 50);
+        stbi_write_jpg(outputPath.c_str(), width, height, 3, imageData, 70);
     }
-    cout << "✅ Gambar berhasil diekspor ke: "<< outputPath << endl;
     return getFileSize(outputPath);
 }
 
-void imageToBlock(RGB* block, int width, int height){
+void imageToBlock(RGB* &block, int width, int height){
     block = new RGB[width * height];
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
@@ -80,10 +80,11 @@ void imageToBlock(RGB* block, int width, int height){
             }
         }
     }
+    cout << block << endl;
 }
 
 
-void blockToImage(RGB* block, int width, int height){
+void blockToImage(RGB* &block, int width, int height){
     for (int i = 0; i < height; i++){
         for (int j = 0; j < width; j++){
             RGB color = block[i * width + j];
@@ -110,7 +111,7 @@ void inputErrorMethod(int &errorChoice){
     cout << "  3. Max Pixel Difference" << endl;
     cout << "  4. Entropy" << endl;
     cout << "  5. Structural Similarity Index (SSIM)" << endl;
-    cout << "Masukkan pilihan (1-4): ";
+    cout << "Masukkan pilihan [1-5]: ";
     string input;
     getline(cin, input);
     stringstream ss(input);
@@ -120,20 +121,8 @@ void inputErrorMethod(int &errorChoice){
         cout << "Pilihan tidak valid!" << endl;
         exit(0);
     }
-    if (choice == 1){
-        errorChoice = 1;
-    }
-    else if (choice == 2){
-        errorChoice = 2;
-    }
-    else if (choice == 3){
-        errorChoice = 3;
-    }
-    else if (choice == 4){
-        errorChoice = 4;
-    }
-    else if (choice == 5){
-        errorChoice = 5;
+    if (choice >= 1 && choice <= 5){
+        errorChoice = choice;
     }
     else{
         cout << "Pilihan tidak valid!" << endl ;
@@ -142,6 +131,23 @@ void inputErrorMethod(int &errorChoice){
     cout << endl;
 }
 
+double inputCompressionTarget(){
+    cout << "Masukkan target kompresi [0.0-1.0]: ";
+    string input;
+    getline(cin, input);
+    stringstream ss(input);
+    double target;
+    ss >> target;
+    if (ss.fail() || !ss.eof()){
+        cout << "Target kompresi tidak valid!" << endl;
+        exit(0);
+    }
+    if (target < 0 || target > 1){
+        cout << "Target kompresi tidak valid!" << endl;
+        exit(0);
+    }
+    return target;
+}
 
 void inputTreshold(double &threshold){
     cout << "Masukkan ambang batas error: ";
@@ -230,7 +236,9 @@ string getFileType(string filename){
     return type;
 }
 
-
+void freeData(){
+    stbi_image_free(imageData);
+}
 
 #endif
 #endif
