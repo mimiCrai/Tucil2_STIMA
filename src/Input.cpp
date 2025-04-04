@@ -25,7 +25,6 @@ int inputImage(RGB* &block, int &width, int &height){
     }
     else if (fileType == "JPG"){
         imageData = stbi_load(inputPath.c_str(), &width, &height, &imageChannels, 3);
-        stbi_write_jpg("test.jpg", width, height, 3, imageData, 70);
     }
     else if (fileType == "JPEG"){
         imageData = stbi_load(inputPath.c_str(), &width, &height, &imageChannels, 3);
